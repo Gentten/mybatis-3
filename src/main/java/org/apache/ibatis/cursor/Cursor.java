@@ -18,6 +18,8 @@ package org.apache.ibatis.cursor;
 import java.io.Closeable;
 
 /**
+ * 游标式返回的结果 以迭代器延迟加载
+ * 适合于大数据量查询但是内存不足时
  * Cursor contract to handle fetching items lazily using an Iterator.
  * Cursors are a perfect fit to handle millions of items queries that would not normally fits in memory.
  * If you use collections in resultMaps then cursor SQL queries must be ordered (resultOrdered="true")

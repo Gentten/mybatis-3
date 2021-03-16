@@ -44,7 +44,9 @@ public class SimpleExecutor extends BaseExecutor {
   public int doUpdate(MappedStatement ms, Object parameter) throws SQLException {
     Statement stmt = null;
     try {
+      //这里和查询类似
       Configuration configuration = ms.getConfiguration();
+      //只是没有分页参数 结果处理以及sql
       StatementHandler handler = configuration.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null, null);
       stmt = prepareStatement(handler, ms.getStatementLog());
       return handler.update(stmt);
@@ -58,8 +60,12 @@ public class SimpleExecutor extends BaseExecutor {
     Statement stmt = null;
     try {
       Configuration configuration = ms.getConfiguration();
+      //创建 StatementHandler
+      //这里看到ResultHandler传入了
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
+      //预处理得到 Statement 包含连接获取 参数
       stmt = prepareStatement(handler, ms.getStatementLog());
+      //执行查询
       return handler.query(stmt, resultHandler);
     } finally {
       closeStatement(stmt);
@@ -84,6 +90,7 @@ public class SimpleExecutor extends BaseExecutor {
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
     Connection connection = getConnection(statementLog);
+    //预处理
     stmt = handler.prepare(connection, transaction.getTimeout());
     handler.parameterize(stmt);
     return stmt;

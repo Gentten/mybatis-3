@@ -38,6 +38,9 @@ public class BoundSql {
   private final String sql;
   private final List<ParameterMapping> parameterMappings;
   private final Object parameterObject;
+  /**
+   * 附加的参数 例如分页插件添加的分页参数
+   */
   private final Map<String, Object> additionalParameters;
   private final MetaObject metaParameters;
 

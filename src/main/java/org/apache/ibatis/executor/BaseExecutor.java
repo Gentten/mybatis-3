@@ -1,17 +1,17 @@
 /**
- *    Copyright 2009-2020 the original author or authors.
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright 2009-2020 the original author or authors.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.ibatis.executor;
 
@@ -45,6 +45,8 @@ import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
+ * 基础执行器
+ *
  * @author Clinton Begin
  */
 public abstract class BaseExecutor implements Executor {
@@ -53,12 +55,20 @@ public abstract class BaseExecutor implements Executor {
 
   protected Transaction transaction;
   protected Executor wrapper;
-
+  /**
+   * 延迟加载队列
+   */
   protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
+  /**
+   * 本地缓存
+   */
   protected PerpetualCache localCache;
   protected PerpetualCache localOutputParameterCache;
   protected Configuration configuration;
 
+  /**
+   * 查询栈 递归调用时深度+1 例如  N+1的查询 <association property="user" javaType="User" column="userid" select="selectUser"/>
+   */
   protected int queryStack;
   private boolean closed;
 
@@ -193,10 +203,12 @@ public abstract class BaseExecutor implements Executor {
 
   @Override
   public CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql) {
+    //判断执行器是否关闭
     if (closed) {
       throw new ExecutorException("Executor was closed.");
     }
     CacheKey cacheKey = new CacheKey();
+    //MyBatis 对于其 Key 的生成采取规则为：[mappedStatementId + offset + limit + SQL + queryParams + environment]生成一个哈希码
     cacheKey.update(ms.getId());
     cacheKey.update(rowBounds.getOffset());
     cacheKey.update(rowBounds.getLimit());
@@ -204,6 +216,7 @@ public abstract class BaseExecutor implements Executor {
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     TypeHandlerRegistry typeHandlerRegistry = ms.getConfiguration().getTypeHandlerRegistry();
     // mimic DefaultParameterHandler logic
+    //模仿DefaultParameterHandler的逻辑,不再重复就是 省略掉设置参数只是把解析的参数值放入cacheKey，请参考DefaultParameterHandler
     for (ParameterMapping parameterMapping : parameterMappings) {
       if (parameterMapping.getMode() != ParameterMode.OUT) {
         Object value;
@@ -221,6 +234,7 @@ public abstract class BaseExecutor implements Executor {
         cacheKey.update(value);
       }
     }
+    //环境包含了数据源 事务显然区分查询结果
     if (configuration.getEnvironment() != null) {
       // issue #176
       cacheKey.update(configuration.getEnvironment().getId());
@@ -267,15 +281,16 @@ public abstract class BaseExecutor implements Executor {
     }
   }
 
+  //模板模式 实际的CURD实现交给子类
   protected abstract int doUpdate(MappedStatement ms, Object parameter) throws SQLException;
 
   protected abstract List<BatchResult> doFlushStatements(boolean isRollback) throws SQLException;
 
   protected abstract <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql)
-      throws SQLException;
+    throws SQLException;
 
   protected abstract <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
-      throws SQLException;
+    throws SQLException;
 
   protected void closeStatement(Statement statement) {
     if (statement != null) {
@@ -290,12 +305,10 @@ public abstract class BaseExecutor implements Executor {
   /**
    * Apply a transaction timeout.
    *
-   * @param statement
-   *          a current statement
-   * @throws SQLException
-   *           if a database access error occurs, this method is called on a closed <code>Statement</code>
-   * @since 3.4.0
+   * @param statement a current statement
+   * @throws SQLException if a database access error occurs, this method is called on a closed <code>Statement</code>
    * @see StatementUtil#applyTransactionTimeout(Statement, Integer, Integer)
+   * @since 3.4.0
    */
   protected void applyTransactionTimeout(Statement statement) throws SQLException {
     StatementUtil.applyTransactionTimeout(statement, statement.getQueryTimeout(), transaction.getTimeout());
@@ -333,6 +346,12 @@ public abstract class BaseExecutor implements Executor {
     return list;
   }
 
+  /**
+   *
+   * @param statementLog
+   * @return
+   * @throws SQLException
+   */
   protected Connection getConnection(Log statementLog) throws SQLException {
     Connection connection = transaction.getConnection();
     if (statementLog.isDebugEnabled()) {

@@ -21,6 +21,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
+ * 类型转化 包括
+ * 1、如何PreparedStatement参数设置
+ * 2、获得结果
  * @author Clinton Begin
  */
 public interface TypeHandler<T> {

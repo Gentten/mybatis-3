@@ -1,17 +1,17 @@
 /**
- *    Copyright 2009-2020 the original author or authors.
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Copyright 2009-2020 the original author or authors.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.ibatis.mapping;
 
@@ -23,6 +23,7 @@ import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
+ * 参数映射
  * @author Clinton Begin
  */
 public class ParameterMapping {
@@ -100,6 +101,7 @@ public class ParameterMapping {
     }
 
     public ParameterMapping build() {
+      //获得类型转化器
       resolveTypeHandler();
       validate();
       return parameterMapping;
@@ -109,8 +111,8 @@ public class ParameterMapping {
       if (ResultSet.class.equals(parameterMapping.javaType)) {
         if (parameterMapping.resultMapId == null) {
           throw new IllegalStateException("Missing resultmap in property '"
-              + parameterMapping.property + "'.  "
-              + "Parameters of type java.sql.ResultSet require a resultmap.");
+            + parameterMapping.property + "'.  "
+            + "Parameters of type java.sql.ResultSet require a resultmap.");
         }
       } else {
         if (parameterMapping.typeHandler == null) {
@@ -122,6 +124,7 @@ public class ParameterMapping {
     }
 
     private void resolveTypeHandler() {
+      //如果没有指定自定义的typeHandler，则根据javaType，jdbcType来查表确定一个默认的typeHandler
       if (parameterMapping.typeHandler == null && parameterMapping.javaType != null) {
         Configuration configuration = parameterMapping.configuration;
         TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
